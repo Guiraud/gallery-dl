@@ -138,6 +138,92 @@ For macOS users with MacPorts:
 
     sudo port install gallery-dl
 
+macOS GUI
+---------
+
+An experimental Tk-based GUI is available for macOS and ships with the sources:
+
+.. code:: bash
+
+    python3 macos_app/gallerydl_gui.py
+
+It spawns ``python -m gallery_dl`` under the hood, so make sure the current
+Python interpreter can import :mod:`gallery_dl`. To bundle the script as a
+standalone ``.app`` you can use PyInstaller_:
+
+.. code:: bash
+
+    python3 -m pip install pyinstaller
+    python3 -m PyInstaller --windowed --name "gallery-dl" macos_app/gallerydl_gui.py
+
+The generated bundle is placed in ``dist/gallery-dl.app``.
+
+Testing the macOS GUI
+~~~~~~~~~~~~~~~~~~~~~
+
+You can verify the helper quickly without packaging:
+
+.. code:: bash
+
+    python3 macos_app/gallerydl_gui.py
+
+1. Collez une URL publique (p. ex. ``https://www.deviantart.com/popular``) et cliquez sur *Télécharger* — la zone de sortie doit afficher la commande exécutée puis la progression.
+2. Cliquez sur *Arrêter* pour vérifier que le processus se termine proprement (le statut redevient « Prêt »).
+3. Testez un répertoire cible custom en changeant le champ « Dossier de sortie » et constatez que les fichiers sont écrits dans ce dossier.
+4. Facultatif : sélectionnez un cookies.txt ou un navigateur, relancez un téléchargement X.com et vérifiez que `--cookies` / `--cookies-from-browser` apparaissent dans le journal.
+
+X.com cookies & hashtags
+------------------------
+
+X.com requires authenticated cookies to access timelines or hashtag searches.
+You can let *gallery-dl* read them directly from your browser while it runs:
+
+.. code:: bash
+
+    gallery-dl --cookies-from-browser safari/x.com "https://x.com/search?q=%23art&src=typed_query&f=live"
+    gallery-dl --cookies-from-browser firefox/x.com https://x.com/username
+
+If you prefer an exported cookies.txt file, use a browser extension such as
+`Get cookies.txt <https://chromewebstore.google.com/detail/get-cookiestxt/iejldocppagpbhpfbokckggkecgkagdj>`__
+or the GUI helper:
+
+- launch ``python3 macos_app/gallerydl_gui.py``;
+- either select the ``cookies-x-com.txt`` file you created, or pick your browser in the
+  combobox so the app adds ``--cookies-from-browser <navigateur>/x.com`` automatically;
+- paste the hashtag search URL, for example ``https://x.com/search?q=%23galerie&f=live``.
+
+To capture the textual content of the posts (in addition to media files), enable metadata output:
+
+.. code:: bash
+
+    gallery-dl --cookies-from-browser firefox/x.com --write-metadata https://x.com/username
+    gallery-dl --cookies-from-browser firefox/x.com --dump-json "https://x.com/search?q=%23galerie&f=live"
+
+The ``.json`` metadata written alongside downloads contains each tweet's full text under ``"text"``. Combine it with a ``--format`` template or an external processor if you need to merge media and text into a custom layout.
+
+Offline HTML viewer
+~~~~~~~~~~~~~~~~~~~
+
+If you also collect metadata (``--write-metadata``), you can rebuild an offline timeline that mimics X.com's layout:
+
+.. code:: bash
+
+    # after a download that targeted X.com
+    python3 scripts/build_twitter_html.py /path/to/downloads
+
+The helper walks through ``twitter/`` sub-folders, groups media by tweet ID and creates an ``index.html`` next to the files so you can browse them locally (filter by hashtags, open permalinks, etc.).
+
+From the macOS GUI, enable the checkbox “Générer une page HTML X.com” before launching the download; the app will add ``--write-metadata`` automatically and run the generator once the transfer succeeds.
+
+If you prefer a metadata-only run (no files saved) using ``--dump-json``, redirect the output to a ``.jsonl`` file and feed it to the generator:
+
+.. code:: bash
+
+    gallery-dl --cookies-from-browser firefox/x.com --dump-json "https://x.com/search?q=%23PlusJamaisPs&src=typed_query&f=live" > plusjamaisps.jsonl
+    python3 scripts/build_twitter_html.py --json plusjamaisps.jsonl --output plusjamaisps.html
+
+The resulting HTML references the remote media but keeps the same filtering and search tools for quick browsing.
+
 Docker
 --------
 Using the Dockerfile in the repository:
