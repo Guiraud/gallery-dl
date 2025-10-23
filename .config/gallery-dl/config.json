@@ -1,0 +1,10 @@
+{
+    "extractor": {
+        "twitter": {
+        "sleep-request": 6,
+        "sleep": 2,
+        "sleep-extractor": 120,
+        "sleep-429": 600
+        }
+    }
+}
