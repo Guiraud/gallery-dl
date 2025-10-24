@@ -34,7 +34,7 @@ class YoutubeDLDownloader(DownloaderBase):
         self.ytdl_instance = None
         self.rate_dyn = None
         self.forward_cookies = self.config("forward-cookies", True)
-        self.progress = self.config("progress", 3.0)
+        self.progress = self.config("progress", 0.0)
         self.outtmpl = self.config("outtmpl")
 
     def download(self, url, pathfmt):

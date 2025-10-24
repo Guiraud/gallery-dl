@@ -309,7 +309,7 @@ def main():
                         return getattr(exc, "code", 128)
 
             pformat = config.get(("output",), "progress", True)
-            if pformat and len(input_manager.urls) > 1 and \
+            if pformat and input_manager.urls and \
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
 
